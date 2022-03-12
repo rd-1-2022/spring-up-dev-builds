@@ -86,7 +86,7 @@ jobs:
           mv build/download/spring-up-linux-ubuntu18/spring-up build/upload/spring-up-linux-ubuntu18
           mv build/download/spring-up-linux-ubuntu20/spring-up build/upload/spring-up-linux-ubuntu20
           mv build/download/spring-up-macos/spring-up build/upload/spring-up-darwin-amd64
-          mv build/libs/spring-up-*-SNAPSHOT.jar build/upload/
+          mv build/download/spring-up-jar/spring-up-*-SNAPSHOT.jar build/upload/
       - uses: ncipollo/release-action@v1
         with:
           tag: ${{ env.TAG }}
