@@ -1,0 +1,64 @@
+name: Release Snapshot
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  native:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - nickname: macos
+            os: macos-latest
+            graal: 22.0.0.2
+          - nickname: linux
+            os: ubuntu-latest
+            graal: 22.0.0.2
+    name: Build ${{ matrix.nickname }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: rd-1-2022/spring-up
+      - uses: actions/setup-java@v2
+        with:
+          distribution: adopt
+          java-version: 11
+          cache: gradle
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          version: ${{ matrix.graal }}
+          java-version: 11
+          components: native-image
+          set-java-home: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: ./gradlew build nativeCompile --no-daemon
+      - uses: actions/upload-artifact@v2
+        with:
+          name: spring-up-${{ matrix.nickname }}
+          path: build/native/nativeCompile/
+          retention-days: 1
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [native]
+    name: Release
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: spring-up-macos
+          path: build/spring-up-macos
+      - uses: actions/download-artifact@v2
+        with:
+          name: spring-up-linux
+          path: build/spring-up-linux
+      - name: Generate tag
+        run: |
+          echo TAG=$(date +%Y%m%d-%H%m%S) >> $GITHUB_ENV
+      - uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ env.TAG }}
+          artifacts: "build/spring-up-linux/*,build/spring-up-macos/*"
+          token: ${{ secrets.GITHUB_TOKEN }}
