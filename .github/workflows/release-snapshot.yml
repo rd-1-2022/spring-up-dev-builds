@@ -49,16 +49,20 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: spring-up-macos
-          path: build/spring-up-macos
+          path: build/download/spring-up-macos
       - uses: actions/download-artifact@v2
         with:
           name: spring-up-linux
-          path: build/spring-up-linux
-      - name: Generate tag
+          path: build/download/spring-up-linux
+      - name: Prepare Release
         run: |
           echo TAG=$(date +%Y%m%d-%H%m%S) >> $GITHUB_ENV
+          mkdir build/upload
+          mv build/download/spring-up-linux/spring-up build/upload/spring-up-linux-amd64
+          mv build/download/spring-up-macos/spring-up build/upload/spring-up-darwin-amd64
       - uses: ncipollo/release-action@v1
         with:
           tag: ${{ env.TAG }}
-          artifacts: "build/spring-up-linux/*,build/spring-up-macos/*"
+          prerelease: true
+          artifacts: "build/upload/*"
           token: ${{ secrets.GITHUB_TOKEN }}
