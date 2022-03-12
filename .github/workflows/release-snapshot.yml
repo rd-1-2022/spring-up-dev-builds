@@ -14,8 +14,11 @@ jobs:
           - nickname: macos
             os: macos-latest
             graal: 22.0.0.2
-          - nickname: linux
-            os: ubuntu-latest
+          - nickname: linux-ubuntu20
+            os: ubuntu-20.04
+            graal: 22.0.0.2
+          - nickname: linux-ubuntu18
+            os: ubuntu-18.04
             graal: 22.0.0.2
     name: Build ${{ matrix.nickname }}
     steps:
@@ -52,13 +55,18 @@ jobs:
           path: build/download/spring-up-macos
       - uses: actions/download-artifact@v2
         with:
-          name: spring-up-linux
-          path: build/download/spring-up-linux
+          name: spring-up-linux-ubuntu20
+          path: build/download/spring-up-linux-ubuntu20
+      - uses: actions/download-artifact@v2
+        with:
+          name: spring-up-linux-ubuntu18
+          path: build/download/spring-up-linux-ubuntu18
       - name: Prepare Release
         run: |
           echo TAG=$(date +%Y%m%d-%H%m%S) >> $GITHUB_ENV
           mkdir build/upload
-          mv build/download/spring-up-linux/spring-up build/upload/spring-up-linux-amd64
+          mv build/download/spring-up-linux-ubuntu18/spring-up build/upload/spring-up-linux-ubuntu18
+          mv build/download/spring-up-linux-ubuntu20/spring-up build/upload/spring-up-linux-ubuntu20
           mv build/download/spring-up-macos/spring-up build/upload/spring-up-darwin-amd64
       - uses: ncipollo/release-action@v1
         with:
